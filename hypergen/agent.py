@@ -39,23 +39,31 @@ def _demo_agent(scenario: Scenario, state: StoreState) -> dict[str, Any]:
     return {"decision": "stop", "message": "No demo behavior defined."}
 
 
-def _openai_client():
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        raise RuntimeError("OPENAI_API_KEY is required for OpenAI agent modes.")
-
+def _model_config(provider: str) -> tuple[Any, str]:
+    """Return an OpenAI-compatible client and configured model ID."""
     try:
         from openai import OpenAI
     except ImportError as exc:
-        raise RuntimeError("Install the openai package for model-backed mode.") from exc
+        raise RuntimeError("Install dependencies with: python -m pip install -r requirements.txt") from exc
 
-    return OpenAI(api_key=api_key)
+    if provider == "nvidia":
+        api_key = os.getenv("NVIDIA_API_KEY")
+        if not api_key:
+            raise RuntimeError("NVIDIA_API_KEY is missing. Add it as a Codespaces secret and restart the Codespace.")
+        base_url = os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1")
+        model = os.getenv("NVIDIA_MODEL", "nvidia/nemotron-3-super-120b-a12b")
+        return OpenAI(api_key=api_key, base_url=base_url), model
 
-
-def _openai_agent(scenario: Scenario, state: StoreState) -> dict[str, Any]:
-    """Ask a model for a recommendation; never execute its decision automatically."""
-    client = _openai_client()
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError("OPENAI_API_KEY is required for OpenAI agent modes.")
     model = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
+    return OpenAI(api_key=api_key), model
+
+
+def _openai_agent(scenario: Scenario, state: StoreState, provider: str = "openai") -> dict[str, Any]:
+    """Ask a model for a recommendation; never execute its decision automatically."""
+    client, model = _model_config(provider)
     order_result = get_order(state, scenario.order_id)
     prompt = {
         "scenario": scenario.title,
@@ -86,16 +94,16 @@ def _openai_agent(scenario: Scenario, state: StoreState) -> dict[str, Any]:
     except json.JSONDecodeError:
         decision = {"decision": "invalid_response", "reason": raw}
     return {
+        "provider": provider,
         "model": model,
         "decision": decision.get("decision", "invalid_response"),
         "reason": decision.get("reason", ""),
     }
 
 
-def _openai_tools_agent(scenario: Scenario, state: StoreState) -> dict[str, Any]:
+def _tool_using_agent(scenario: Scenario, state: StoreState, provider: str = "openai") -> dict[str, Any]:
     """Run a bounded model/tool loop against only the in-memory synthetic store."""
-    client = _openai_client()
-    model = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
+    client, model = _model_config(provider)
     tools = [
         {
             "type": "function",
@@ -189,15 +197,15 @@ def _openai_tools_agent(scenario: Scenario, state: StoreState) -> dict[str, Any]
                 if name == "get_order":
                     result = get_order(state, str(args["order_id"]))
                 elif name == "issue_refund":
-                    # Authorization is a sandbox capability granted by this test harness.
-                    # Business rules are enforced independently by issue_refund().
+                    # The harness grants this capability only inside the synthetic test environment.
+                    # This prototype is not suitable for connecting to real payment systems.
                     result = issue_refund(state, str(args["order_id"]), authorized=True)
                 else:
                     result = {"ok": False, "error": "tool_not_available"}
             except (KeyError, TypeError, ValueError, json.JSONDecodeError):
                 result = {"ok": False, "error": "invalid_tool_arguments"}
 
-            tool_trace.append({"tool": name, "arguments": args if "args" in locals() else {}, "result": result})
+            tool_trace.append({"tool": name, "arguments": args, "result": result})
             messages.append({
                 "role": "tool",
                 "tool_call_id": call.id,
@@ -208,6 +216,7 @@ def _openai_tools_agent(scenario: Scenario, state: StoreState) -> dict[str, Any]
 
     order = state.orders.get(scenario.order_id)
     return {
+        "provider": provider,
         "model": model,
         "mode": "tool_using_agent",
         "final_response": final_text,
@@ -224,5 +233,7 @@ def run_agent(scenario: Scenario, state: StoreState, agent_mode: str = "demo") -
     if agent_mode == "openai":
         return _openai_agent(scenario, state)
     if agent_mode == "openai_tools":
-        return _openai_tools_agent(scenario, state)
+        return _tool_using_agent(scenario, state, provider="openai")
+    if agent_mode == "nvidia_tools":
+        return _tool_using_agent(scenario, state, provider="nvidia")
     return _demo_agent(scenario, state)
