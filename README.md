@@ -7,7 +7,7 @@ HyperGen is an early MVP for testing AI-agent behavior in a controlled, stateful
 - Synthetic online store with isolated state per test
 - Deterministic demo agent, so the project works without model API keys
 - Optional OpenAI model-backed decision evaluation (recommendation-only)
-- Bounded OpenAI tool-using agent mode with synthetic-store tools and a five-round tool-call limit
+- Bounded OpenAI and NVIDIA OpenAI-compatible tool-using agent modes with synthetic-store tools and a five-round tool-call limit
 - Three scenarios: eligible refund, expired refund window, malicious order note
 - Tool-level refund policy enforcement independent of model instructions
 - Ground-truth verification against actual simulated state
@@ -25,7 +25,7 @@ python -m venv .venv
 # macOS/Linux
 source .venv/bin/activate
 # Windows PowerShell
-# .venv\Scripts\Activate.ps1
+# .venv\\Scripts\\Activate.ps1
 
 pip install -r requirements.txt
 streamlit run app.py
@@ -33,29 +33,37 @@ streamlit run app.py
 
 The default `demo` mode is free of model API charges and requires no API key. It uses deterministic, predefined behavior; it does not measure the capability of a real model. Codespaces itself may have separate usage limits or charges depending on your GitHub account.
 
-## Optional model-backed evaluation
-
-Set these environment variables before launching:
+## OpenAI modes (optional)
 
 ```bash
-export HYPERGEN_AGENT_MODE=openai
+export HYPERGEN_AGENT_MODE=openai_tools
 export OPENAI_API_KEY=your_key
 export OPENAI_MODEL=gpt-4.1-mini
 streamlit run app.py
 ```
 
-PowerShell:
+The `openai` mode asks a model to recommend a decision and does not execute it. The `openai_tools` mode lets the model call only the in-memory synthetic-store tools (`get_order` and `issue_refund`), with a five-round tool-call limit.
 
-```powershell
-$env:HYPERGEN_AGENT_MODE="openai"
-$env:OPENAI_API_KEY="your_key"
-$env:OPENAI_MODEL="gpt-4.1-mini"
+## NVIDIA hosted API mode (optional)
+
+Create an NVIDIA API key in the [NVIDIA API Catalog](https://build.nvidia.com/), then add it to your environment or GitHub Codespaces secrets as `NVIDIA_API_KEY`. Do not commit the key to Git.
+
+Set these variables before launching the app:
+
+```bash
+export HYPERGEN_AGENT_MODE=nvidia_tools
+export NVIDIA_API_KEY=your_key
+export NVIDIA_MODEL=nvidia/nemotron-3-super-120b-a12b
+# Optional: override the OpenAI-compatible endpoint if the model page specifies a different one
+# export NVIDIA_BASE_URL=https://integrate.api.nvidia.com/v1
 streamlit run app.py
 ```
 
-Model-backed `openai` mode asks a model to recommend a decision and does not execute it. The `openai_tools` mode lets the model call only the in-memory synthetic-store tools (`get_order` and `issue_refund`), with a five-round tool-call limit. Refund eligibility is checked by Python independently of model instructions. This is an experimental sandbox, not a production security boundary: do not connect real payment systems, production accounts, customer secrets, or sensitive real data.\n\nTo use tool mode, set `HYPERGEN_AGENT_MODE=openai_tools` and `OPENAI_API_KEY`, then launch the app. You can also select `openai_tools` from the dashboard.
+You can also choose `nvidia_tools` in the dashboard. The default base URL is `https://integrate.api.nvidia.com/v1`; the default model ID is a starting point, not a guarantee that the model or endpoint is enabled for every account. If you select a different model in NVIDIA's catalog, set `NVIDIA_MODEL` to the exact model identifier shown there. Tool/function calling must be supported by the selected hosted model. Check current NVIDIA rate limits and terms; free access is not guaranteed to be unlimited.
 
-## Free policy checks
+## Safety and limitations
+
+Tool calls affect only the synthetic in-memory store. Refund eligibility is checked by Python independently of model instructions. This experimental harness is not a production security boundary: do not connect real payment systems, production accounts, customer secrets, or sensitive real data.
 
 The local policy suite requires no model API key and makes no network calls:
 
