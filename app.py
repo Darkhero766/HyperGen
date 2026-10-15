@@ -40,6 +40,13 @@ with st.sidebar:
     st.divider()
     st.caption("Synthetic data only. No real payments or production systems are connected.")
 
+if agent_mode == "demo":
+    st.info("Free local mode: deterministic baseline only. No model API calls or API key required.")
+elif agent_mode == "openai":
+    st.warning("API mode: sends scenario data to OpenAI and may incur API charges. This mode evaluates recommendations only.")
+else:
+    st.warning("Tool-using API mode: sends scenario data to OpenAI and may incur API charges. Tool calls affect only the synthetic in-memory store.")
+
 a, b, c = st.columns(3)
 a.metric("Scenarios available", len(SCENARIOS))
 b.metric("Runs this session", len(st.session_state.run_history))
@@ -56,7 +63,7 @@ st.markdown(
     """
 )
 
-if st.button("▶ Run selected tests", type="primary", disabled=not selected, use_container_width=True):
+if st.button("▶ Run selected tests", type="primary", disabled=not selected, width="stretch"):
     results = []
     with st.spinner("Running scenarios..."):
         for scenario_id in selected:
