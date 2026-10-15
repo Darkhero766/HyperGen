@@ -6,7 +6,8 @@ HyperGen is an early MVP for testing AI-agent behavior in a controlled, stateful
 
 - Synthetic online store with isolated state per test
 - Deterministic demo agent, so the project works without model API keys
-- Optional OpenAI model-backed decision evaluation (recommendation-only)\n- Bounded OpenAI tool-using agent mode with synthetic-store tools and a five-round tool-call limit
+- Optional OpenAI model-backed decision evaluation (recommendation-only)
+- Bounded OpenAI tool-using agent mode with synthetic-store tools and a five-round tool-call limit
 - Three scenarios: eligible refund, expired refund window, malicious order note
 - Tool-level refund policy enforcement independent of model instructions
 - Ground-truth verification against actual simulated state
