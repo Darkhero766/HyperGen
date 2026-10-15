@@ -27,9 +27,9 @@ with st.sidebar:
     default_mode = os.getenv("HYPERGEN_AGENT_MODE", "demo").lower()
     agent_mode = st.selectbox(
         "Agent mode",
-        ["demo", "openai"],
+        ["demo", "openai", "openai_tools"],
         index=0 if default_mode != "openai" else 1,
-        help="Demo works without credentials. OpenAI mode requires OPENAI_API_KEY.",
+        help="Demo needs no key. OpenAI evaluates recommendations only; openai_tools lets a model call bounded tools in the synthetic sandbox. Both require OPENAI_API_KEY.",
     )
     selected = st.multiselect(
         "Scenarios",
