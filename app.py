@@ -25,11 +25,12 @@ st.caption(
 with st.sidebar:
     st.header("Test configuration")
     default_mode = os.getenv("HYPERGEN_AGENT_MODE", "demo").lower()
+    modes = ["demo", "openai", "openai_tools", "nvidia_tools"]
     agent_mode = st.selectbox(
         "Agent mode",
-        ["demo", "openai", "openai_tools"],
-        index={"demo": 0, "openai": 1, "openai_tools": 2}.get(default_mode, 0),
-        help="Demo needs no key. OpenAI evaluates recommendations only; openai_tools lets a model call bounded tools in the synthetic sandbox. Both require OPENAI_API_KEY.",
+        modes,
+        index={mode: i for i, mode in enumerate(modes)}.get(default_mode, 0),
+        help="Demo needs no key. OpenAI modes require OPENAI_API_KEY. NVIDIA tool mode requires NVIDIA_API_KEY and a hosted NVIDIA model that supports tool calling.",
     )
     selected = st.multiselect(
         "Scenarios",
@@ -44,8 +45,10 @@ if agent_mode == "demo":
     st.info("Free local mode: deterministic baseline only. No model API calls or API key required.")
 elif agent_mode == "openai":
     st.warning("API mode: sends scenario data to OpenAI and may incur API charges. This mode evaluates recommendations only.")
+elif agent_mode == "openai_tools":
+    st.warning("OpenAI tool mode: API usage may incur charges. Tool calls affect only the synthetic in-memory store.")
 else:
-    st.warning("Tool-using API mode: sends scenario data to OpenAI and may incur API charges. Tool calls affect only the synthetic in-memory store.")
+    st.warning("NVIDIA tool mode: check NVIDIA model/API limits and terms. Tool calls affect only the synthetic in-memory store.")
 
 a, b, c = st.columns(3)
 a.metric("Scenarios available", len(SCENARIOS))
