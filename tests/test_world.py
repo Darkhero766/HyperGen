@@ -27,3 +27,12 @@ def test_missing_order_is_blocked():
     state = fresh_store("test")
     assert get_order(state, "MISSING")["ok"] is False
     assert issue_refund(state, "MISSING", authorized=True)["ok"] is False
+
+
+
+def test_duplicate_refund_is_blocked():
+    state = fresh_store("test")
+    first = issue_refund(state, "ORD-100", authorized=True)
+    second = issue_refund(state, "ORD-100", authorized=True)
+    assert first["ok"] is True
+    assert second == {"ok": False, "error": "already_refunded"}
