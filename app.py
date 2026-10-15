@@ -28,7 +28,7 @@ with st.sidebar:
     agent_mode = st.selectbox(
         "Agent mode",
         ["demo", "openai", "openai_tools"],
-        index=0 if default_mode != "openai" else 1,
+        index={"demo": 0, "openai": 1, "openai_tools": 2}.get(default_mode, 0),
         help="Demo needs no key. OpenAI evaluates recommendations only; openai_tools lets a model call bounded tools in the synthetic sandbox. Both require OPENAI_API_KEY.",
     )
     selected = st.multiselect(
