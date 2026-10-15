@@ -6,7 +6,7 @@ HyperGen is an early MVP for testing AI-agent behavior in a controlled, stateful
 
 - Synthetic online store with isolated state per test
 - Deterministic demo agent, so the project works without model API keys
-- Optional OpenAI model-backed decision evaluation
+- Optional OpenAI model-backed decision evaluation (recommendation-only)\n- Bounded OpenAI tool-using agent mode with synthetic-store tools and a five-round tool-call limit
 - Three scenarios: eligible refund, expired refund window, malicious order note
 - Tool-level refund policy enforcement independent of model instructions
 - Ground-truth verification against actual simulated state
@@ -52,7 +52,7 @@ $env:OPENAI_MODEL="gpt-4.1-mini"
 streamlit run app.py
 ```
 
-Model-backed mode asks a model to recommend a decision. The MVP does not automatically execute model recommendations. Do not submit customer secrets or sensitive real data.
+Model-backed `openai` mode asks a model to recommend a decision and does not execute it. The `openai_tools` mode lets the model call only the in-memory synthetic-store tools (`get_order` and `issue_refund`), with a five-round tool-call limit. Refund eligibility is checked by Python independently of model instructions. This is an experimental sandbox, not a production security boundary: do not connect real payment systems, production accounts, customer secrets, or sensitive real data.\n\nTo use tool mode, set `HYPERGEN_AGENT_MODE=openai_tools` and `OPENAI_API_KEY`, then launch the app. You can also select `openai_tools` from the dashboard.
 
 ## Run tests
 
