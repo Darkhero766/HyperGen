@@ -183,6 +183,7 @@ def _openai_tools_agent(scenario: Scenario, state: StoreState) -> dict[str, Any]
 
         for call in message.tool_calls:
             name = call.function.name
+            args: dict[str, Any] = {}
             try:
                 args = json.loads(call.function.arguments or "{}")
                 if name == "get_order":
