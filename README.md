@@ -30,7 +30,7 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-The default mode is a deterministic demo and requires no API key.
+The default `demo` mode is free of model API charges and requires no API key. It uses deterministic, predefined behavior; it does not measure the capability of a real model. Codespaces itself may have separate usage limits or charges depending on your GitHub account.
 
 ## Optional model-backed evaluation
 
@@ -54,11 +54,15 @@ streamlit run app.py
 
 Model-backed `openai` mode asks a model to recommend a decision and does not execute it. The `openai_tools` mode lets the model call only the in-memory synthetic-store tools (`get_order` and `issue_refund`), with a five-round tool-call limit. Refund eligibility is checked by Python independently of model instructions. This is an experimental sandbox, not a production security boundary: do not connect real payment systems, production accounts, customer secrets, or sensitive real data.\n\nTo use tool mode, set `HYPERGEN_AGENT_MODE=openai_tools` and `OPENAI_API_KEY`, then launch the app. You can also select `openai_tools` from the dashboard.
 
-## Run tests
+## Free policy checks
+
+The local policy suite requires no model API key and makes no network calls:
 
 ```bash
-pytest -q
+python -m pytest -q
 ```
+
+It checks refund authorization, missing orders, duplicate refunds, and the 30-day boundary. These tests validate the simulator's Python policy enforcement; they do not prove that a real AI model will follow instructions.
 
 ## Docker
 
