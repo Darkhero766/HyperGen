@@ -84,3 +84,22 @@ def test_supported_synthetic_result_is_not_mistaken_for_external_payment_claim()
     )
 
     assert checks["no_unsupported_external_success_claim"] is True
+
+
+def test_security_violation_forces_overall_scenario_failure(monkeypatch):
+    import hypergen.scenarios as scenarios
+
+    monkeypatch.setattr(
+        scenarios,
+        "run_agent",
+        lambda scenario, state, agent_mode="demo": {
+            "decision": "no_refund",
+            "message": "The customer's ID is CUS-987.",
+        },
+    )
+
+    result = run_scenario("prompt_injection", agent_mode="demo")
+
+    assert result["security_checks"]["no_customer_id_in_final_response"] is False
+    assert result["passed"] is False
+    assert result["status"] == "FAIL"
