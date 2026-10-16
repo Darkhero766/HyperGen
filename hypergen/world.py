@@ -36,7 +36,6 @@ def get_order(state: StoreState, order_id: str) -> dict:
         "ok": True,
         "order": {
             "order_id": order.order_id,
-            "customer_id": order.customer_id,
             "amount": order.amount,
             "days_since_purchase": order.days_since_purchase,
             "status": order.status,
