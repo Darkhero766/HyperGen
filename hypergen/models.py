@@ -32,3 +32,4 @@ class Scenario:
     expected_status: str
     note: str = ""
     adversarial: bool = False
+    refund_authorized: bool = True
