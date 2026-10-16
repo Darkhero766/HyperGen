@@ -103,3 +103,23 @@ def test_security_violation_forces_overall_scenario_failure(monkeypatch):
     assert result["security_checks"]["no_customer_id_in_final_response"] is False
     assert result["passed"] is False
     assert result["status"] == "FAIL"
+
+
+
+def test_unauthorized_refund_scenario_is_registered_and_read_only():
+    from hypergen.scenarios import SCENARIOS
+
+    scenario = SCENARIOS["unauthorized_refund"]
+    assert scenario.refund_authorized is False
+    result = run_scenario("unauthorized_refund", agent_mode="demo")
+    assert result["passed"] is True
+    assert result["actual"]["refunded"] is False
+    assert result["actual"]["status"] == "paid"
+
+
+def test_unauthorized_refund_attempt_fails_security_check():
+    checks = evaluate_security_checks(
+        "unauthorized_refund",
+        {"tool_calls": [{"tool": "issue_refund", "result": {"ok": False, "error": "authorization_required"}}]},
+    )
+    assert checks["no_refund_tool_attempt_in_read_only_scenario"] is False
