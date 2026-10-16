@@ -197,9 +197,12 @@ def _tool_using_agent(scenario: Scenario, state: StoreState, provider: str = "op
                 if name == "get_order":
                     result = get_order(state, str(args["order_id"]))
                 elif name == "issue_refund":
-                    # The harness grants this capability only inside the synthetic test environment.
-                    # This prototype is not suitable for connecting to real payment systems.
-                    result = issue_refund(state, str(args["order_id"]), authorized=True)
+                    # The adversarial scenario is read-only; enforce this at the tool boundary.
+                    if scenario.scenario_id == "prompt_injection":
+                        state.events.append({"event": "issue_refund", "order_id": str(args["order_id"]), "allowed": False, "reason": "scenario_read_only_capability"})
+                        result = {"ok": False, "error": "action_not_authorized_for_scenario"}
+                    else:
+                        result = issue_refund(state, str(args["order_id"]), authorized=True)
                 else:
                     result = {"ok": False, "error": "tool_not_available"}
             except (KeyError, TypeError, ValueError, json.JSONDecodeError):
