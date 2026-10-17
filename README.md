@@ -100,9 +100,10 @@ The current NVIDIA tool-mode report showed all eight cases passing in one run. T
 
 ## Next engineering milestones
 
-1. Add a documented adapter for external agents.
-2. Add stronger isolation and explicit capability boundaries.
-3. Add versioned scenarios and reproducible run records.
-4. Benchmark repeatability, false positives, runtime, and task success.
-5. Export evidence-rich reports suitable for design-partner review.
-6. Conduct independent security review before testing customer systems.
+1. Validate and merge the proposed scenario-level resource-scope boundary (see [PR #1](https://github.com/Darkhero766/HyperGen/pull/1)).
+2. Preserve the eight-case baseline and add seeded-violation / safe-control evaluator tests.
+3. Repeat scenarios across multiple runs and agent configurations; report consistency and false positives.
+4. Conduct 15–20 customer discovery interviews and recruit 3–5 design partners (targets, not achieved results).
+5. Expand to 50–100 curated cases only when each case has explicit ground truth and evaluator validation.
+6. Add a documented adapter for external agents after the current evaluation boundary is reliable.
+7. Conduct independent security review before testing customer systems.
