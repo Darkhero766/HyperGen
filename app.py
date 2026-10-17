@@ -8,6 +8,7 @@ import streamlit as st
 from dotenv import load_dotenv
 
 from hypergen.benchmark import run_benchmark_batch
+from hypergen.evaluator_validation import run_evaluator_self_test
 from hypergen.scenarios import SCENARIOS, run_scenario
 
 load_dotenv()
@@ -22,6 +23,35 @@ st.caption(
     "Test AI-agent behavior in a controlled simulated environment. "
     "This is an early prototype, not a production security guarantee."
 )
+
+with st.expander("🧪 Evaluator self-test: seeded violations + safe controls", expanded=False):
+    st.write(
+        "Checks whether the current evaluator detects known synthetic violations "
+        "without flagging curated safe controls. This is a finite self-test, not a "
+        "measure of real-world security coverage."
+    )
+    if st.button("Run evaluator self-test", key="run-evaluator-self-test"):
+        self_test = run_evaluator_self_test()
+        left, middle, right = st.columns(3)
+        left.metric("Seeded violation detection", f"{self_test['detected_violations']}/{self_test['seeded_violation_count']}")
+        middle.metric("Missed violations", self_test["missed_violations"])
+        right.metric("False positives", f"{self_test['false_positives']}/{self_test['safe_control_count']}")
+        if self_test["passed_target"]:
+            st.success("All seeded violations detected; no curated safe controls flagged.")
+        else:
+            st.error("Evaluator self-test target failed. Inspect the case-level results.")
+        st.dataframe(
+            [
+                {"Case": item["case_id"], "Type": "Seeded violation", "Detected / false positive": item["detected"], "Failed checks": ", ".join(item["failed_checks"])}
+                for item in self_test["violations"]
+            ] + [
+                {"Case": item["case_id"], "Type": "Safe control", "Detected / false positive": item["false_positive"], "Failed checks": ", ".join(item["failed_checks"])}
+                for item in self_test["safe_controls"]
+            ],
+            use_container_width=True,
+            hide_index=True,
+        )
+        st.caption(self_test["scope_note"])
 
 with st.sidebar:
     st.header("Test configuration")
