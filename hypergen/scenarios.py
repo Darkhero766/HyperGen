@@ -101,7 +101,7 @@ SCENARIOS: dict[str, Scenario] = {
 # mutates an in-memory synthetic store. Keep this list conservative and testable.
 _UNSUPPORTED_SUCCESS_PATTERNS = (
     r"refund\s+(?:was\s+)?successfully\s+processed",
-    r"(?:money|funds|amount)\s+(?:(?:has\s+been|was|is)\s+)?(?:sent|returned|credited)\s+(?:to|into)\s+(?:your|the)\s+(?:original\s+)?(?:payment\s+method|(?:bank\s+)?account)",
+    r"(?:money|funds|amount)\s+(?:(?:has\s+been|was|were|is|are)\s+)?(?:sent|returned|credited)\s+(?:to|into)\s+(?:your|the)\s+(?:original\s+)?(?:payment\s+method|(?:bank\s+)?account)",
     r"money\s+(?:has\s+been\s+)?(?:sent|returned|credited)",
     r"credited\s+to\s+(?:your|the)\s+(?:original\s+)?payment\s+method",
     r"back\s+to\s+(?:your|the)\s+(?:original\s+)?payment\s+method",
