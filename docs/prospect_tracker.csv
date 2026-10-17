@@ -1,0 +1,20 @@
+company,segment,priority,public_product_url,reason_to_research,contact_role,status,notes
+Agrim AI,Customer support agents,P1,https://agrim-ai.com/,Public customer-support agent workflows,Founder or engineering lead,Not contacted,Prospect hypothesis only; no buying intent established
+Levrage AI,Voice agents / customer operations,P1,https://www.levrage.ai/,Public end-to-end e-commerce and customer operations workflows,Founder or technical lead,Not contacted,Prospect hypothesis only; no buying intent established
+Hey Support,Customer support and sales agent,P1,https://www.hey.support/,Public support sales tracking and appointment workflows,Founder or product engineering,Not contacted,Prospect hypothesis only; no buying intent established
+Ayudo,Customer experience agents,P1,https://www.ayudo.ai/,Public customer support workflows and integrations,CTO or AI engineering lead,Not contacted,Prospect hypothesis only; no buying intent established
+Relevance AI,Agent platform,P2,https://relevanceai.com/product,Public agent evaluation tool access and governance features,Platform or product security lead,Not contacted,Potential comparator or integration partner; existing capabilities must be researched
+Gumloop,Agent automation platform,P2,https://www.gumloop.com/,Public agents with tools browser and workflow execution,Platform engineering or product lead,Not contacted,Potential comparator or partner; not assumed buyer
+LangChain / LangGraph,Agent framework ecosystem,P2,https://www.langchain.com/langchain,Framework users may need agent-action regression testing,Developer relations or ecosystem engineering,Not contacted,Potential integration ecosystem
+CrewAI,Agent framework ecosystem,P2,https://www.crewai.com/,Agent framework and platform ecosystem,Developer relations or platform engineering,Not contacted,Verify current product fit before outreach
+n8n,Workflow automation,P2,https://n8n.io/,Workflow automation with AI and business actions,Platform or security engineering,Not contacted,Potential ecosystem partner
+Composio,Agent tool integration,P2,https://composio.dev/,Tool and integration layer for agents,Product or engineering lead,Not contacted,Potential partner or technical comparison
+Browserbase,Browser infrastructure,P2,https://www.browserbase.com/,Browser execution infrastructure used by agents,Developer platform or partnerships,Not contacted,Potential ecosystem partner
+Voiceflow,Conversational AI builder,P2,https://www.voiceflow.com/,Builds conversational agents and workflows,Product or platform engineering,Not contacted,Potential platform account
+Botpress,AI agent builder,P2,https://botpress.com/,AI agent and chatbot building platform,Product or platform engineering,Not contacted,Potential platform account
+Decagon,Customer experience agents,P3,https://decagon.ai/,Customer experience agents with consequential workflows,Security or AI engineering,PARKED,Later-stage target; high bar and existing tools likely
+Sierra,Customer experience agents,P3,https://sierra.ai/,Customer experience agent platform,Security or engineering leadership,PARKED,Aspirational account; not first-customer assumption
+Intercom Fin,Customer support AI,P3,https://www.intercom.com/fin,Customer support automation,AI engineering or trust,PARKED,Established incumbent; use for market research before outreach
+Gupshup,Customer conversation agents,P3,https://www.gupshup.ai/,Agents across customer conversations and workflows,AI platform or security lead,PARKED,Potential later account
+Small AI implementation agencies,Implementation services,P1,,Agencies may reuse test packs across client deployments,Agency founder or delivery lead,Research needed,Find named agencies through public case studies and partner directories; do not invent leads
+Publicly launched LangGraph/OpenAI Agents SDK startups,Agent startups,P1,,Teams shipping tool-using agents may need pre-deployment testing,Founder or staff engineer,Research needed,Find specific teams from public launch posts and case studies
