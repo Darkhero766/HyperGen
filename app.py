@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 import streamlit as st
 from dotenv import load_dotenv
 
+from hypergen.benchmark import run_benchmark_batch
 from hypergen.scenarios import SCENARIOS, run_scenario
 
 load_dotenv()
@@ -38,6 +39,7 @@ with st.sidebar:
         default=list(SCENARIOS),
         format_func=lambda key: SCENARIOS[key].title,
     )
+    repetitions = st.slider("Repetitions per scenario", min_value=1, max_value=5, value=1, help="Repeated model runs may incur additional API costs.")
     st.divider()
     st.caption("Synthetic data only. No real payments or production systems are connected.")
 
@@ -67,36 +69,16 @@ st.markdown(
 )
 
 if st.button("▶ Run selected tests", type="primary", disabled=not selected, width="stretch"):
-    results = []
-    with st.spinner("Running scenarios..."):
-        for scenario_id in selected:
-            try:
-                results.append(run_scenario(scenario_id, agent_mode=agent_mode))
-            except Exception as exc:
-                results.append({
-                    "scenario_id": scenario_id,
-                    "scenario_title": SCENARIOS[scenario_id].title,
-                    "status": "ERROR",
-                    "passed": False,
-                    "summary": f"{type(exc).__name__}: {exc}",
-                    "events": [],
-                    "expected": {},
-                    "actual": {},
-                    "agent_mode": agent_mode,
-                })
-    record = {
-        "run_id": datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ"),
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "agent_mode": agent_mode,
-        "results": results,
-    }
+    with st.spinner(f"Running {len(selected) * repetitions} executions..."):
+        batch = run_benchmark_batch(selected, agent_mode, repetitions, run_scenario, {key: value.title for key, value in SCENARIOS.items()})
+    record = {"run_id": datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ"), "created_at": datetime.now(timezone.utc).isoformat(), **batch}
     st.session_state.run_history.insert(0, record)
 
 if st.session_state.run_history:
     latest = st.session_state.run_history[0]
     results = latest["results"]
-    passed = sum(bool(r.get("passed")) for r in results)
-    failed = len(results) - passed
+    passed = latest["passed"]
+    failed = latest["failed_or_errors"]
     st.divider()
     st.header("Latest run")
     st.caption(f"Run ID: {latest['run_id']} · {latest['created_at']} · Mode: {latest['agent_mode']}")
@@ -105,9 +87,13 @@ if st.session_state.run_history:
     y.metric("Passed", passed)
     z.metric("Failed / errors", failed)
 
+    st.metric("Overall execution pass rate", f"{latest['pass_rate']:.1%}")
+    st.markdown("**Per-scenario repeatability**")
+    st.dataframe([{"Scenario": item["scenario_title"], "Executions": item["executions"], "Passed": item["passes"], "Failed / errors": item["failures_or_errors"], "Pass rate": f"{item['pass_rate']:.1%}", "Consistent outcome": item["consistent_outcome"]} for item in latest["scenario_summary"].values()], use_container_width=True, hide_index=True)
+
     for result in results:
         icon = "✅" if result.get("passed") else ("⚠️" if result.get("status") == "ERROR" else "❌")
-        with st.expander(f"{icon} {result.get('scenario_title', result['scenario_id'])} — {result.get('status', 'UNKNOWN')}"):
+        with st.expander(f"Run {result.get('repetition', 1)} · {icon} {result.get('scenario_title', result['scenario_id'])} — {result.get('status', 'UNKNOWN')}"):
             st.write(result.get("summary", "No summary."))
             left, right = st.columns(2)
             with left:
