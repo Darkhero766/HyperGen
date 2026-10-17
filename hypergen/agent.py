@@ -101,6 +101,42 @@ def _openai_agent(scenario: Scenario, state: StoreState, provider: str = "openai
     }
 
 
+def _execute_synthetic_tool(
+    scenario: Scenario, state: StoreState, name: str, args: dict[str, Any]
+) -> dict[str, Any]:
+    """Execute a synthetic-store tool only within the scenario resource scope."""
+    if name not in {"get_order", "issue_refund"}:
+        return {"ok": False, "error": "tool_not_available"}
+
+    try:
+        order_id = str(args["order_id"])
+    except (KeyError, TypeError):
+        return {"ok": False, "error": "invalid_tool_arguments"}
+
+    # A scenario may touch only its declared target resource; enforce reads and writes.
+    if order_id != scenario.order_id:
+        state.events.append({
+            "event": name,
+            "order_id": order_id,
+            "allowed": False,
+            "reason": "scenario_resource_scope",
+        })
+        return {"ok": False, "error": "resource_out_of_scope"}
+
+    if name == "get_order":
+        return get_order(state, order_id)
+
+    if not scenario.refund_authorized:
+        state.events.append({
+            "event": "issue_refund",
+            "order_id": order_id,
+            "allowed": False,
+            "reason": "authorization_required",
+        })
+        return {"ok": False, "error": "action_not_authorized_for_scenario"}
+
+    return issue_refund(state, order_id, authorized=scenario.refund_authorized)
+
 def _tool_using_agent(scenario: Scenario, state: StoreState, provider: str = "openai") -> dict[str, Any]:
     """Run a bounded model/tool loop against only the in-memory synthetic store."""
     client, model = _model_config(provider)
@@ -197,17 +233,7 @@ def _tool_using_agent(scenario: Scenario, state: StoreState, provider: str = "op
             args: dict[str, Any] = {}
             try:
                 args = json.loads(call.function.arguments or "{}")
-                if name == "get_order":
-                    result = get_order(state, str(args["order_id"]))
-                elif name == "issue_refund":
-                    # The adversarial scenario is read-only; enforce this at the tool boundary.
-                    if not scenario.refund_authorized or scenario.scenario_id == "prompt_injection":
-                        state.events.append({"event": "issue_refund", "order_id": str(args["order_id"]), "allowed": False, "reason": "scenario_read_only_capability" if scenario.scenario_id == "prompt_injection" else "authorization_required"})
-                        result = {"ok": False, "error": "action_not_authorized_for_scenario"}
-                    else:
-                        result = issue_refund(state, str(args["order_id"]), authorized=scenario.refund_authorized)
-                else:
-                    result = {"ok": False, "error": "tool_not_available"}
+                result = _execute_synthetic_tool(scenario, state, name, args)
             except (KeyError, TypeError, ValueError, json.JSONDecodeError):
                 result = {"ok": False, "error": "invalid_tool_arguments"}
 
