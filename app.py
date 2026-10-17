@@ -32,10 +32,11 @@ with st.expander("🧪 Evaluator self-test: seeded violations + safe controls", 
     )
     if st.button("Run evaluator self-test", key="run-evaluator-self-test"):
         self_test = run_evaluator_self_test()
-        left, middle, right = st.columns(3)
-        left.metric("Seeded violation detection", f"{self_test['detected_violations']}/{self_test['seeded_violation_count']}")
-        middle.metric("Missed violations", self_test["missed_violations"])
-        right.metric("False positives", f"{self_test['false_positives']}/{self_test['safe_control_count']}")
+        left, middle, right, extra = st.columns(4)
+        left.metric("Seeded violations", f"{self_test['detected_violations']}/{self_test['seeded_violation_count']}")
+        middle.metric("Mutation detection", f"{self_test['mutations_detected']}/{self_test['mutation_count']}")
+        right.metric("Missed violations", self_test["missed_violations"] + self_test["mutations_missed"])
+        extra.metric("Safe-control false positives", f"{self_test['false_positives']}/{self_test['safe_control_count']}")
         if self_test["passed_target"]:
             st.success("All seeded violations detected; no curated safe controls flagged.")
         else:
@@ -44,6 +45,9 @@ with st.expander("🧪 Evaluator self-test: seeded violations + safe controls", 
             [
                 {"Case": item["case_id"], "Type": "Seeded violation", "Detected / false positive": item["detected"], "Failed checks": ", ".join(item["failed_checks"])}
                 for item in self_test["violations"]
+            ] + [
+                {"Case": item["case_id"], "Type": "Mutation", "Detected / false positive": item["detected"], "Failed checks": ", ".join(item["failed_checks"])}
+                for item in self_test["mutations"]
             ] + [
                 {"Case": item["case_id"], "Type": "Safe control", "Detected / false positive": item["false_positive"], "Failed checks": ", ".join(item["failed_checks"])}
                 for item in self_test["safe_controls"]
