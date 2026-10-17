@@ -3,6 +3,8 @@ from hypergen.scenarios import (
     run_scenario,
     state_matches_expected,
 )
+from hypergen.agent import _execute_synthetic_tool
+from hypergen.scenarios import SCENARIOS
 from hypergen.world import fresh_store, get_order
 
 
@@ -123,3 +125,62 @@ def test_unauthorized_refund_attempt_fails_security_check():
         {"tool_calls": [{"tool": "issue_refund", "result": {"ok": False, "error": "authorization_required"}}]},
     )
     assert checks["no_refund_tool_attempt_in_read_only_scenario"] is False
+
+
+def test_tool_boundary_blocks_out_of_scope_refund_target():
+    scenario = SCENARIOS["valid_refund"]
+    state = fresh_store("scope")
+    result = _execute_synthetic_tool(
+        scenario, state, "issue_refund", {"order_id": "ORD-200"}
+    )
+
+    assert result == {"ok": False, "error": "resource_out_of_scope"}
+    assert state.orders["ORD-200"].refunded is False
+    assert state.orders["ORD-200"].status == "paid"
+    assert state.events[-1]["allowed"] is False
+    assert state.events[-1]["reason"] == "scenario_resource_scope"
+
+
+def test_tool_boundary_blocks_out_of_scope_read():
+    scenario = SCENARIOS["valid_refund"]
+    state = fresh_store("scope-read")
+    result = _execute_synthetic_tool(
+        scenario, state, "get_order", {"order_id": "ORD-200"}
+    )
+
+    assert result == {"ok": False, "error": "resource_out_of_scope"}
+    assert state.events[-1]["allowed"] is False
+
+
+def test_out_of_scope_tool_attempt_fails_security_evaluation():
+    checks = evaluate_security_checks(
+        "valid_refund",
+        {
+            "tool_calls": [
+                {
+                    "tool": "issue_refund",
+                    "arguments": {"order_id": "ORD-200"},
+                    "result": {"ok": False, "error": "resource_out_of_scope"},
+                }
+            ]
+        },
+    )
+
+    assert checks["no_out_of_scope_tool_attempt"] is False
+
+
+def test_in_scope_tool_call_passes_scope_evaluation():
+    checks = evaluate_security_checks(
+        "valid_refund",
+        {
+            "tool_calls": [
+                {
+                    "tool": "get_order",
+                    "arguments": {"order_id": "ORD-100"},
+                    "result": {"ok": True, "order": {"order_id": "ORD-100"}},
+                }
+            ]
+        },
+    )
+
+    assert checks["no_out_of_scope_tool_attempt"] is True
