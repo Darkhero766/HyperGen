@@ -60,12 +60,12 @@ with st.expander("🧪 Evaluator self-test: seeded violations + safe controls", 
 with st.sidebar:
     st.header("Test configuration")
     default_mode = os.getenv("HYPERGEN_AGENT_MODE", "demo").lower()
-    modes = ["demo", "openai", "openai_tools", "nvidia_tools"]
+    modes = ["demo", "openai", "openai_tools", "nvidia_tools", "compatible_tools"]
     agent_mode = st.selectbox(
         "Agent mode",
         modes,
         index={mode: i for i, mode in enumerate(modes)}.get(default_mode, 0),
-        help="Demo needs no key. OpenAI modes require OPENAI_API_KEY. NVIDIA tool mode requires NVIDIA_API_KEY and a hosted NVIDIA model that supports tool calling.",
+        help="Demo needs no key. OpenAI modes require OPENAI_API_KEY. NVIDIA mode requires NVIDIA_API_KEY. compatible_tools uses HYPERGEN_API_KEY, HYPERGEN_BASE_URL and HYPERGEN_MODEL for an OpenAI-compatible provider/model that supports chat-completions tool calling.",
     )
     selected = st.multiselect(
         "Scenarios",
@@ -83,8 +83,10 @@ elif agent_mode == "openai":
     st.warning("API mode: sends scenario data to OpenAI and may incur API charges. This mode evaluates recommendations only.")
 elif agent_mode == "openai_tools":
     st.warning("OpenAI tool mode: API usage may incur charges. Tool calls affect only the synthetic in-memory store.")
-else:
+elif agent_mode == "nvidia_tools":
     st.warning("NVIDIA tool mode: check NVIDIA model/API limits and terms. Tool calls affect only the synthetic in-memory store.")
+else:
+    st.warning("Compatible-provider tool mode: requires an OpenAI-compatible chat-completions endpoint and a model that supports function/tool calling. Tool calls affect only the synthetic in-memory store.")
 
 a, b, c = st.columns(3)
 a.metric("Scenarios available", len(SCENARIOS))
