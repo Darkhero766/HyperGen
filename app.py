@@ -144,9 +144,9 @@ if st.session_state.run_history:
             st.download_button(
                 "Download this result (JSON)",
                 data=json.dumps(result, indent=2),
-                file_name=f"{result['scenario_id']}-result.json",
+                file_name=f"{result['scenario_id']}-run-{result.get('repetition', 1)}-result.json",
                 mime="application/json",
-                key=f"download-{latest['run_id']}-{result['scenario_id']}",
+                key=f"download-{latest['run_id']}-{result['scenario_id']}-rep-{result.get('repetition', 1)}",
             )
 
     st.download_button(
@@ -154,6 +154,7 @@ if st.session_state.run_history:
         data=json.dumps(latest, indent=2),
         file_name=f"hypergen-run-{latest['run_id']}.json",
         mime="application/json",
+        key=f"download-full-run-{latest['run_id']}",
     )
     with st.expander("Run history (this browser session only)"):
         for record in st.session_state.run_history:
