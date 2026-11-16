@@ -18,7 +18,7 @@ const sample=[{kind:"context",label:"TRUSTED CONTEXT",detail:"Actor: support_age
 export default function Home(){
  const [trace,setTrace]=useState(0);const [openFaq,setOpenFaq]=useState<number|null>(0);
  const [email,setEmail]=useState("");const [role,setRole]=useState("");const [message,setMessage]=useState("");
- const mailto="mailto:hello@hypergen.dev?subject="+encodeURIComponent("HyperGen design partner inquiry")+"&body="+encodeURIComponent("Email: "+email+"\nTeam / role: "+role+"\nUse case: "+message);
+ const inquiryUrl=repo+"/issues/new?title="+encodeURIComponent("Design partner inquiry")+"&body="+encodeURIComponent("Contact: "+email+"\\nTeam / role: "+role+"\\nUse case: "+message);
  return <main className="ambient min-h-screen overflow-hidden">
  <div className="pointer-events-none absolute inset-x-0 top-0 h-[900px] grid-bg"/>
  <header className="relative z-20 max-w-7xl mx-auto px-6 lg:px-10 py-7 flex items-center justify-between">
