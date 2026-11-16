@@ -1,0 +1,4 @@
+# Exact model IDs must be checked against your NVIDIA account's catalog.
+# These are candidates, not verified tool-call compatible models.
+models:
+  - nvidia/nemotron-3-super-120b-a12b
