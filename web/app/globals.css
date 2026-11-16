@@ -1,11 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-:root{color-scheme:dark}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#070910;color:#f5f5fa;font-family:Inter,Arial,sans-serif}::selection{background:#8d7af7;color:#fff}
-.ambient{background:radial-gradient(ellipse at 74% 12%,rgba(99,74,194,.22),transparent 43%),radial-gradient(ellipse at 15% 55%,rgba(43,114,122,.12),transparent 46%)}
-.grid-bg{background-image:linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);background-size:72px 72px;mask-image:linear-gradient(to bottom,black,transparent 92%)}
-.glass{background:linear-gradient(145deg,rgba(255,255,255,.065),rgba(255,255,255,.016));border:1px solid rgba(255,255,255,.105);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+:root{color-scheme:dark}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#020204;color:#f5f5fa;font-family:Inter,Arial,sans-serif}::selection{background:#8d7af7;color:#fff}
+.ambient{background:radial-gradient(ellipse 35% 24% at 78% 12%,rgba(83,52,189,.12),transparent 100%),radial-gradient(ellipse 28% 18% at 12% 55%,rgba(36,67,102,.045),transparent 100%),#020204}
+.grid-bg{background-image:linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);background-size:72px 72px;mask-image:linear-gradient(to bottom,black,transparent 92%)}
+.glass{background:linear-gradient(145deg,rgba(255,255,255,.032),rgba(255,255,255,.006));border:1px solid rgba(255,255,255,.075);box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}
 .pill{border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:12px 21px;display:inline-flex;align-items:center;gap:10px;transition:transform .2s,background .2s}.pill:hover{transform:translateY(-2px);background:rgba(255,255,255,.1)}.pill:focus-visible,a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #a6ffe2;outline-offset:4px}
 .shimmer{background:linear-gradient(100deg,#fff 10%,#a99dff 55%,#b2ffed 100%);background-clip:text;color:transparent}
 .trace-line{border-left:1px solid rgba(166,255,226,.25);padding-left:18px;position:relative}.trace-line:before{content:"";position:absolute;left:-4px;top:9px;width:7px;height:7px;background:#a6ffe2;border-radius:50%}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* Ink-black material system: crisp edges, restrained illumination, no gray slabs. */
+.glass{backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.glass:hover{border-color:rgba(173,159,255,.2)}
+.hero-halo{background:radial-gradient(circle at 50% 48%,rgba(112,76,244,.17),rgba(69,50,163,.05) 32%,transparent 66%);filter:blur(24px)}
+.hero-vignette{background:linear-gradient(90deg,#020204 0%,rgba(2,2,4,.92) 15%,rgba(2,2,4,.18) 50%,transparent 80%)}
+.metal-line{background:linear-gradient(90deg,transparent,rgba(197,186,255,.34),transparent);height:1px}
+@media(max-width:899px){.hero-vignette{background:linear-gradient(90deg,rgba(2,2,4,.35),rgba(2,2,4,.1))}}
