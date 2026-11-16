@@ -17,7 +17,7 @@ Open http://localhost:3000. For a production build run `npm run build`.
 - `data/results.json` is intentionally empty until verified benchmark runs exist.
 - `public/data/results.json` is the public download copy; update both together from validated results.
 - The trace explorer is explicitly **illustrative**, not a real recorded run. Replace it with versioned trace JSON only after validating it.
-- The design-partner form opens a prefilled **public GitHub issue**. Users must sign in to GitHub; submitted contact details are public. Replace this with a verified private intake endpoint before production launch. No submissions are stored by this website.
+- The design-partner form opens a prefilled **public GitHub issue**, but deliberately does not collect or include visitor email. Team and use-case text may still be public if submitted; the site warns users not to share personal data or secrets. No submissions are stored by this website. **Private intake alternative:** configure a verified private contact form service or server-side authenticated endpoint with spam protection, data retention policy, and consent; until then, do not request sensitive information.
 - The hero CTA scrolls to the benchmark section; it does not run models or ask for API keys.
 - Three.js scene is dynamically imported on larger, capable devices only; reduced-motion and low-end mobile receive a static fallback.
 - No customer logos, fabricated metrics, or testimonials are included.
@@ -32,3 +32,4 @@ Open http://localhost:3000. For a production build run `npm run build`.
 6. Review dependency lockfile and pin versions for reproducible deployments.
 
 Inspired by contemporary premium website composition and motion; no Framer assets, source, or branding were copied.
+\n## Benchmark publication\n\nThe leaderboard imports typed `data/results.json`. Run `python -m hypergen.publish_results --reviewed` from the repository root **only after** inspecting generated traces and results. The command writes both web JSON copies. Keep the empty unpublished files until independently reviewed evidence exists.\n
