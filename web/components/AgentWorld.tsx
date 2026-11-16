@@ -1,27 +1,51 @@
 "use client";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, Line, RoundedBox } from "@react-three/drei";
-import { useRef } from "react";
+import { Float, Line, RoundedBox, Stars } from "@react-three/drei";
+import { useMemo, useRef } from "react";
 import * as THREE from "three";
 
-const nodes: [number,number,number][] = [[-2,1,0],[1.6,1.4,-.5],[-.2,-1.2,.5],[2.7,-1.5,-1]];
+/** Original procedural agent network. No external 3D assets or textures. */
+const nodes: [number,number,number][] = [[-2.7,1.5,-.5],[1.45,1.65,-1.4],[-.75,-1.35,.9],[2.85,-1.1,-.7],[.35,.15,1.35]];
+const links: [number,number][] = [[0,1],[0,2],[1,3],[2,3],[0,4],[1,4],[2,4],[3,4]];
+function Core({index}:{index:number}){
+ const active=index===4;
+ return <Float speed={.8+index*.15} rotationIntensity={.07} floatIntensity={.17}>
+  <group position={nodes[index]} rotation={[.38,.64,.1]}>
+   <RoundedBox args={[active?1.85:1.35,active?1.85:1.35,active?1.85:1.35]} radius={.075} smoothness={3}>
+    <meshPhysicalMaterial color={active?"#6d56ff":"#111321"} roughness={.22} metalness={.8} transparent opacity={active?.22:.12} depthWrite={false}/>
+   </RoundedBox>
+   <lineSegments><edgesGeometry args={[new THREE.BoxGeometry(active?1.86:1.36,active?1.86:1.36,active?1.86:1.36)]}/><lineBasicMaterial color={active?"#c2b6ff":"#777cba"} transparent opacity={active?.92:.58}/></lineSegments>
+   <mesh rotation={[.4,.2,.1]}><octahedronGeometry args={[active?.64:.28,1]}/><meshPhysicalMaterial color={active?"#a999ff":"#a2b8e9"} emissive={active?"#6951ff":"#292e6a"} emissiveIntensity={active?1.1:.3} wireframe metalness={.8}/></mesh>
+   {active&&<mesh><icosahedronGeometry args={[1.24,1]}/><meshBasicMaterial color="#8f7aff" wireframe transparent opacity={.16} depthWrite={false}/></mesh>}
+  </group>
+ </Float>;
+}
 function Network(){
  const group=useRef<THREE.Group>(null);
- const packets=useRef<THREE.Mesh[]>([]);
- const paths:[[number,number,number],[number,number,number]][]=[ [nodes[0],nodes[1]],[nodes[1],nodes[2]],[nodes[2],nodes[3]],[nodes[0],nodes[2]] ];
- useFrame(({clock,pointer})=>{
-  if(group.current){group.current.rotation.y=THREE.MathUtils.lerp(group.current.rotation.y,pointer.x*.14,.025);group.current.rotation.x=THREE.MathUtils.lerp(group.current.rotation.x,-pointer.y*.1,.025)}
-  packets.current.forEach((mesh,i)=>{if(!mesh)return;const [a,b]=paths[i];const t=(clock.elapsedTime*.23+i*.27)%1;mesh.position.set(...new THREE.Vector3(...a).lerp(new THREE.Vector3(...b),t).toArray())});
+ const packets=useRef<(THREE.Mesh|null)[]>([]);
+ const endpoints=useMemo(()=>links.map(([a,b])=>[new THREE.Vector3(...nodes[a]),new THREE.Vector3(...nodes[b])]),[]);
+ useFrame(({clock,pointer},delta)=>{
+  if(group.current){
+   group.current.rotation.y=THREE.MathUtils.damp(group.current.rotation.y,pointer.x*.13,2,delta);
+   group.current.rotation.x=THREE.MathUtils.damp(group.current.rotation.x,-pointer.y*.09,2,delta);
+   group.current.position.y=Math.sin(clock.elapsedTime*.38)*.07;
+  }
+  packets.current.forEach((mesh,i)=>{if(!mesh)return;const [a,b]=endpoints[i];const t=(clock.elapsedTime*(.17+i*.009)+i*.21)%1;mesh.position.lerpVectors(a,b,t);const scale=.6+Math.sin(t*Math.PI)*.8;mesh.scale.setScalar(scale)});
  });
  return <group ref={group}>
-  {nodes.map((p,i)=><Float key={i} speed={1.2+i*.2} rotationIntensity={.12} floatIntensity={.3}><group position={p}>
-   <RoundedBox args={[1.65,1.65,1.65]} radius={.12} smoothness={4}><meshPhysicalMaterial color={i===1?"#9d8cff":"#34375d"} metalness={.4} roughness={.25} transparent opacity={.16}/></RoundedBox>
-   <lineSegments><edgesGeometry args={[new THREE.BoxGeometry(1.65,1.65,1.65)]}/><lineBasicMaterial color={i===1?"#b4a9ff":"#7e8cbd"} transparent opacity={.7}/></lineSegments>
-   <mesh><icosahedronGeometry args={[.3,1]}/><meshBasicMaterial color={i===2?"#a6ffe2":"#b2a7ff"} wireframe/></mesh>
-  </group></Float>)}
-  {paths.map(([a,b],i)=><group key={i}><Line points={[a,b]} color="#9c93e5" transparent opacity={.32} lineWidth={1}/><mesh ref={el=>{if(el)packets.current[i]=el}}><octahedronGeometry args={[.095,0]}/><meshBasicMaterial color="#a6ffe2"/></mesh></group>)}
+  {nodes.map((_,i)=><Core index={i} key={i}/>)}
+  {endpoints.map(([a,b],i)=><group key={i}>
+   <Line points={[a,b]} color="#7f70df" transparent opacity={.28} lineWidth={1}/>
+   <mesh ref={el=>{packets.current[i]=el}}><octahedronGeometry args={[.065,0]}/><meshBasicMaterial color="#c8bdff" toneMapped={false}/></mesh>
+  </group>)}
+  <mesh rotation={[Math.PI/2.6,0,.3]}><torusGeometry args={[3.4,.006,4,110]}/><meshBasicMaterial color="#6151aa" transparent opacity={.28}/></mesh>
+  <mesh rotation={[Math.PI/2.25,.25,-.45]}><torusGeometry args={[4.2,.004,4,120]}/><meshBasicMaterial color="#6151aa" transparent opacity={.16}/></mesh>
  </group>;
 }
 export default function AgentWorld(){
- return <div aria-hidden="true" className="w-full h-full"><Canvas camera={{position:[0,0,9],fov:44}} dpr={[1,1.5]} gl={{antialias:false,alpha:true}}><ambientLight intensity={1.4}/><pointLight position={[3,5,5]} intensity={18} color="#8d7aff"/><Network/></Canvas></div>;
+ return <div aria-hidden="true" className="w-full h-full"><Canvas camera={{position:[0,0,10.5],fov:43}} dpr={[1,1.5]} gl={{antialias:false,alpha:true,powerPreference:"low-power"}}>
+  <ambientLight intensity={.38}/><pointLight position={[3,4,6]} intensity={15} color="#8d79ff"/><pointLight position={[-4,-2,2]} intensity={5} color="#7294ff"/>
+  <Stars radius={30} depth={12} count={140} factor={1.3} saturation={0} fade speed={.12}/>
+  <Network/>
+ </Canvas></div>;
 }
