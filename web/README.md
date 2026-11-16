@@ -17,14 +17,14 @@ Open http://localhost:3000. For a production build run `npm run build`.
 - `data/results.json` is intentionally empty until verified benchmark runs exist.
 - `public/data/results.json` is the public download copy; update both together from validated results.
 - The trace explorer is explicitly **illustrative**, not a real recorded run. Replace it with versioned trace JSON only after validating it.
-- The design-partner form composes an email. `hello@hypergen.dev` is an **unverified placeholder** and must be replaced with a verified address before launch. No submissions are stored.
+- The design-partner form opens a prefilled **public GitHub issue**. Users must sign in to GitHub; submitted contact details are public. Replace this with a verified private intake endpoint before production launch. No submissions are stored by this website.
 - The hero CTA scrolls to the benchmark section; it does not run models or ask for API keys.
 - Three.js scene is dynamically imported on larger, capable devices only; reduced-motion and low-end mobile receive a static fallback.
 - No customer logos, fabricated metrics, or testimonials are included.
 
 ## Before public launch
 
-1. Verify the contact inbox and change the placeholder.
+1. Replace public GitHub issue intake with a verified private design-partner contact workflow.
 2. Generate and publish real results with trace/evaluator provenance.
 3. Replace illustrative trace with recorded and reviewed synthetic trace.
 4. Run `npm run build`, keyboard/screen reader checks and mobile QA.
