@@ -56,7 +56,10 @@ export NVIDIA_API_KEY=your_key
 export NVIDIA_MODEL=nvidia/nemotron-3-super-120b-a12b
 # Optional: override the OpenAI-compatible endpoint if the model page specifies a different one
 # export NVIDIA_BASE_URL=https://integrate.api.nvidia.com/v1
-streamlit run app.py
+streamlit run app.pypython -m Hypergen.benchmark_runner \
+  --runs 5 \
+  --out results/
+
 ```
 
 You can also choose `nvidia_tools` in the dashboard. The default base URL is `https://integrate.api.nvidia.com/v1`; the default model ID is a starting point, not a guarantee that the model or endpoint is enabled for every account. If you select a different model in NVIDIA's catalog, set `NVIDIA_MODEL` to the exact model identifier shown there. Tool/function calling must be supported by the selected hosted model. Check current NVIDIA rate limits and terms; free access is not guaranteed to be unlimited.
