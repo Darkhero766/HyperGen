@@ -46,6 +46,18 @@ def _model_config(provider: str) -> tuple[Any, str]:
     except ImportError as exc:
         raise RuntimeError("Install dependencies with: python -m pip install -r requirements.txt") from exc
 
+    if provider == "compatible":
+        api_key = os.getenv("HYPERGEN_API_KEY")
+        base_url = os.getenv("HYPERGEN_BASE_URL")
+        model = os.getenv("HYPERGEN_MODEL")
+        if not api_key:
+            raise RuntimeError("HYPERGEN_API_KEY is missing. Add it as a Codespaces secret and restart the Codespace.")
+        if not base_url:
+            raise RuntimeError("HYPERGEN_BASE_URL is missing. Set the provider OpenAI-compatible API base URL.")
+        if not model:
+            raise RuntimeError("HYPERGEN_MODEL is missing. Set the exact model ID supported by your provider.")
+        return OpenAI(api_key=api_key, base_url=base_url), model
+
     if provider == "nvidia":
         api_key = os.getenv("NVIDIA_API_KEY")
         if not api_key:
@@ -268,4 +280,6 @@ def run_agent(scenario: Scenario, state: StoreState, agent_mode: str = "demo") -
         return _tool_using_agent(scenario, state, provider="openai")
     if agent_mode == "nvidia_tools":
         return _tool_using_agent(scenario, state, provider="nvidia")
+    if agent_mode == "compatible_tools":
+        return _tool_using_agent(scenario, state, provider="compatible")
     return _demo_agent(scenario, state)
